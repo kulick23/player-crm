@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2.4",
+    "@sap/cds-dk": "^10.0.6",
     "cds-plugin-ui5": "^0.17.0"
   },
   "scripts": {
