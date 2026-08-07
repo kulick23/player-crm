@@ -1,8 +1,14 @@
 using playercrm from '../db/schema';
 
+@requires: 'authenticated-user'
 service PlayerCRMService {
 
   @odata.draft.enabled
+  @restrict: [
+    { grant: '*',                    to: 'CRMAdmin' },
+    { grant: ['READ', 'UPDATE'],     to: 'SupportAgent' },
+    { grant: 'READ',                 to: 'CommunityManager' }
+  ]
   entity Players as projection on playercrm.Player {
     *,
     status.code as statusCode : String(20),
@@ -22,17 +28,41 @@ service PlayerCRMService {
       else                            1
     end as ratingCriticality : Integer
   } actions {
+    @requires: 'CRMAdmin'
     action activateVIP(tier: String) returns Players;
   };
 
+  @restrict: [
+    { grant: '*',    to: 'CRMAdmin' },
+    { grant: 'READ', to: ['SupportAgent', 'CommunityManager'] }
+  ]
   entity PlayerStatuses as projection on playercrm.PlayerStatus;
 
+  @restrict: [
+    { grant: '*',                to: 'CRMAdmin' },
+    { grant: ['READ', 'UPDATE'], to: 'SupportAgent' },
+    { grant: 'READ',             to: 'CommunityManager' }
+  ]
   entity Preferences as projection on playercrm.Preference;
 
+  @restrict: [
+    { grant: '*',                          to: 'CRMAdmin' },
+    { grant: ['READ', 'CREATE', 'UPDATE'], to: 'SupportAgent' },
+    { grant: 'READ',                       to: 'CommunityManager' }
+  ]
   entity Interactions as projection on playercrm.Interaction;
 
+  @restrict: [
+    { grant: '*',    to: 'CRMAdmin' },
+    { grant: 'READ', to: ['SupportAgent', 'CommunityManager'] }
+  ]
   entity LoyaltyPrograms as projection on playercrm.LoyaltyProgram;
 
+  @restrict: [
+    { grant: '*',                to: 'CRMAdmin' },
+    { grant: ['READ', 'CREATE'], to: 'SupportAgent' },
+    { grant: 'READ',             to: 'CommunityManager' }
+  ]
   entity Feedbacks as projection on playercrm.Feedback {
     *,
     case
@@ -42,6 +72,10 @@ service PlayerCRMService {
     end as ratingCriticality : Integer
   };
 
+  @restrict: [
+    { grant: '*',    to: ['CRMAdmin', 'CommunityManager'] },
+    { grant: 'READ', to: 'SupportAgent' }
+  ]
   entity MarketingCampaigns as projection on playercrm.MarketingCampaign;
 
 }
