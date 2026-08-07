@@ -20,5 +20,43 @@
   ],
   "sapux": [
     "app/project1"
-  ]
+  ],
+  "cds": {
+    "requires": {
+      "auth": {
+        "[development]": {
+          "kind": "mocked",
+          "users": {
+            "admin": {
+              "password": "admin",
+              "roles": ["CRMAdmin"]
+            },
+            "support": {
+              "password": "support",
+              "roles": ["SupportAgent"]
+            },
+            "community": {
+              "password": "community",
+              "roles": ["CommunityManager"]
+            }
+          }
+        },
+        "[production]": {
+          "kind": "xsuaa"
+        }
+      },
+      "db": {
+        "[development]": {
+          "kind": "sqlite",
+          "credentials": {
+            "url": "db.sqlite"
+          }
+        },
+        "[production]": {
+          "kind": "hana",
+          "deploy-format": "hdbtable"
+        }
+      }
+    }
+  }
 }
