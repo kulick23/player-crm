@@ -1,24 +1,43 @@
 const cds = require('@sap/cds');
 
+const VIP_TIERS = {
+  '7days':  { price: 149.00, days: 7 },
+  '30days': { price: 279.00, days: 30 },
+  '90days': { price: 599.00, days: 90 }
+};
+
+const isoDate = (date) => date.toISOString().slice(0, 10);
+
+const syncPlayerRating = async (player_ID) => {
+  if (!player_ID) return null;
+
+  const db = cds.entities('playercrm');
+  const feedbacks = await SELECT.from(db.Feedback).where({ player_ID });
+  if (!feedbacks.length) return null;
+
+  const changes = {
+    averageRating: feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length
+  };
+
+  const latest = feedbacks.reduce((a, b) => (a.createdAt > b.createdAt ? a : b));
+  if (latest.rating < 3) {
+    const atRisk = await SELECT.one.from(db.PlayerStatus).where({ code: 'AtRisk' });
+    if (atRisk) changes.status_ID = atRisk.ID;
+  }
+
+  await UPDATE(db.Player, player_ID).with(changes);
+  return changes;
+};
+
 module.exports = (srv) => {
 
-  srv.after('CREATE', 'Feedbacks', async (feedback, req) => {
-    const db = cds.entities('playercrm');
-    const { player_ID, rating } = feedback;
+  srv.after('CREATE', 'Feedbacks', async (feedback) => {
+    await syncPlayerRating(feedback.player_ID);
+  });
 
-    if (!player_ID) return;
-
-    const allFeedbacks = await SELECT.from(db.Feedback).where({ player_ID });
-    const avg = allFeedbacks.reduce((sum, f) => sum + f.rating, 0) / allFeedbacks.length;
-
-    await UPDATE(db.Player, player_ID).with({ averageRating: avg });
-
-    if (rating < 3) {
-      const atRiskStatus = await SELECT.one.from(db.PlayerStatus).where({ code: 'AtRisk' });
-      if (atRiskStatus) {
-        await UPDATE(db.Player, player_ID).with({ status_ID: atRiskStatus.ID });
-      }
-    }
+  srv.after('SAVE', 'Players', async (player) => {
+    const changes = await syncPlayerRating(player?.ID);
+    if (changes) Object.assign(player, changes);
   });
 
   srv.on('activateVIP', 'Players', async (req) => {
@@ -26,20 +45,17 @@ module.exports = (srv) => {
     const playerID = req.params[0].ID;
     const { tier } = req.data;
 
-    const priceMap = { '7days': 149.00, '30days': 279.00, '90days': 599.00 };
-    const price = priceMap[tier] || 0;
+    const { price = 0, days = 0 } = VIP_TIERS[tier] ?? {};
 
-    const today = new Date();
-    const endDate = new Date(today);
-    if (tier === '7days') endDate.setDate(endDate.getDate() + 7);
-    if (tier === '30days') endDate.setDate(endDate.getDate() + 30);
-    if (tier === '90days') endDate.setDate(endDate.getDate() + 90);
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + days);
 
     await INSERT.into(db.LoyaltyProgram).entries({
       player_ID: playerID,
       tier,
-      startDate: today.toISOString().slice(0, 10),
-      endDate: endDate.toISOString().slice(0, 10),
+      startDate: isoDate(startDate),
+      endDate: isoDate(endDate),
       price,
       perks: 'Market discount, access to exclusive cases'
     });
