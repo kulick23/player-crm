@@ -29,8 +29,27 @@ service PlayerCRMService {
     end as ratingCriticality : Integer
   } actions {
     @requires: 'CRMAdmin'
-    action activateVIP(tier: String) returns Players;
+    action   activateVIP(tier: String) returns Players;
+
+    function stats() returns PlayerStats;
   };
+
+  function atRiskPlayers(minRating: Decimal(2,1)) returns array of PlayerSummary;
+
+  type PlayerStats {
+    feedbackCount    : Integer;
+    interactionCount : Integer;
+    loyaltyTotal     : Decimal(10,2);
+    averageRating    : Decimal(2,1);
+    activeSince      : DateTime;
+  }
+
+  type PlayerSummary {
+    ID            : UUID;
+    displayName   : String(100);
+    statusCode    : String(20);
+    averageRating : Decimal(2,1);
+  }
 
   @restrict: [
     { grant: '*',    to: 'CRMAdmin' },

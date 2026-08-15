@@ -40,6 +40,38 @@ module.exports = (srv) => {
     if (changes) Object.assign(player, changes);
   });
 
+  srv.on('stats', 'Players', async (req) => {
+    const db = cds.entities('playercrm');
+    const player_ID = req.params[0].ID;
+
+    const player = await SELECT.one.from(db.Player).where({ ID: player_ID });
+    if (!player) return req.reject(404, `Player ${player_ID} not found`);
+
+    const [feedbacks, interactions, loyalty] = await Promise.all([
+      SELECT.from(db.Feedback).where({ player_ID }),
+      SELECT.from(db.Interaction).where({ player_ID }),
+      SELECT.from(db.LoyaltyProgram).where({ player_ID })
+    ]);
+
+    return {
+      feedbackCount: feedbacks.length,
+      interactionCount: interactions.length,
+      loyaltyTotal: loyalty.reduce((sum, l) => sum + Number(l.price ?? 0), 0),
+      averageRating: player.averageRating,
+      activeSince: player.createdAt
+    };
+  });
+
+  srv.on('atRiskPlayers', async (req) => {
+    const threshold = req.data.minRating ?? 3;
+
+    return SELECT
+      .from(srv.entities.Players)
+      .columns('ID', 'displayName', 'statusCode', 'averageRating')
+      .where`averageRating < ${threshold} or statusCode = 'AtRisk'`
+      .orderBy('averageRating asc');
+  });
+
   srv.on('activateVIP', 'Players', async (req) => {
     const db = cds.entities('playercrm');
     const playerID = req.params[0].ID;
