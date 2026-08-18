@@ -100,10 +100,9 @@ service PlayerCRMService {
 }
 
 annotate PlayerCRMService.Players with {
-  statusCode        @title: 'Status'         @readonly;
+  statusCode        @title: '{i18n>Players_statusCode}' @readonly;
   statusCriticality @UI.Hidden;
   ratingCriticality @UI.Hidden;
-  averageRating     @title: 'Average Rating';
 
   status @Common.ValueList: {
     CollectionPath : 'PlayerStatuses',
@@ -125,8 +124,8 @@ annotate PlayerCRMService.Players with @(
     { Value: averageRating, Criticality: ratingCriticality }
   ],
   UI.HeaderInfo: {
-    TypeName      : 'Player',
-    TypeNamePlural: 'Players',
+    TypeName      : '{i18n>Player_typeName}',
+    TypeNamePlural: '{i18n>Player_typeNamePlural}',
     Title         : { Value: displayName },
     Description   : { Value: email }
   },
@@ -136,12 +135,12 @@ annotate PlayerCRMService.Players with @(
   ],
   UI.DataPoint #StatusPoint: {
     Value      : statusCode,
-    Title      : 'Status',
+    Title      : '{i18n>Players_statusCode}',
     Criticality: statusCriticality
   },
   UI.DataPoint #RatingPoint: {
     Value        : averageRating,
-    Title        : 'Average Rating',
+    Title        : '{i18n>Player_averageRating}',
     Criticality  : ratingCriticality,
     TargetValue  : 5,
     Visualization: #Rating
@@ -163,22 +162,22 @@ annotate PlayerCRMService.Players with @(
   UI.Facets: [
     {
       $Type : 'UI.ReferenceFacet',
-      Label : 'Profile',
+      Label : '{i18n>Facet_profile}',
       Target: '@UI.FieldGroup#Profile'
     },
     {
       $Type : 'UI.ReferenceFacet',
-      Label : 'Interactions',
+      Label : '{i18n>Facet_interactions}',
       Target: 'interactions/@UI.LineItem'
     },
     {
       $Type : 'UI.ReferenceFacet',
-      Label : 'Feedback',
+      Label : '{i18n>Facet_feedback}',
       Target: 'feedbacks/@UI.LineItem'
     },
     {
       $Type : 'UI.ReferenceFacet',
-      Label : 'Loyalty',
+      Label : '{i18n>Facet_loyalty}',
       Target: 'loyalty/@UI.LineItem'
     }
   ]
