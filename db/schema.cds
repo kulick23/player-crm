@@ -13,6 +13,7 @@ entity Player : cuid, managed {
   interactions  : Composition of many Interaction on interactions.player = $self;
   loyalty       : Composition of many LoyaltyProgram on loyalty.player = $self;
   feedbacks     : Composition of many Feedback on feedbacks.player = $self;
+  campaigns     : Composition of many PlayerCampaigns on campaigns.player = $self;
   averageRating : Decimal(2,1) @title: '{i18n>Player_averageRating}' @readonly;
 }
 

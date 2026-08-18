@@ -97,6 +97,12 @@ service PlayerCRMService {
   ]
   entity MarketingCampaigns as projection on playercrm.MarketingCampaign;
 
+  @restrict: [
+    { grant: '*',    to: ['CRMAdmin', 'CommunityManager'] },
+    { grant: 'READ', to: 'SupportAgent' }
+  ]
+  entity CampaignParticipants as projection on playercrm.PlayerCampaigns;
+
 }
 
 annotate PlayerCRMService.Players with {
@@ -195,6 +201,11 @@ annotate PlayerCRMService.Players with @(
       $Type : 'UI.ReferenceFacet',
       Label : '{i18n>Facet_feedback}',
       Target: 'feedbacks/@UI.LineItem'
+    },
+    {
+      $Type : 'UI.ReferenceFacet',
+      Label : '{i18n>Facet_campaigns}',
+      Target: 'campaigns/@UI.LineItem'
     }
   ],
 
@@ -324,6 +335,40 @@ annotate PlayerCRMService.MarketingCampaigns with @(
       $Type : 'UI.ReferenceFacet',
       Label : '{i18n>Facet_details}',
       Target: '@UI.FieldGroup#Details'
+    },
+    {
+      $Type : 'UI.ReferenceFacet',
+      Label : '{i18n>Facet_participants}',
+      Target: 'players/@UI.LineItem'
     }
+  ]
+);
+
+annotate PlayerCRMService.CampaignParticipants with {
+  player @Common.ValueList: {
+    CollectionPath : 'Players',
+    Parameters     : [
+      { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: player_ID, ValueListProperty: 'ID' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'displayName' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'statusCode' }
+    ]
+  };
+
+  campaign @Common.ValueList: {
+    CollectionPath : 'MarketingCampaigns',
+    Parameters     : [
+      { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: campaign_ID, ValueListProperty: 'ID' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'name' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'startDate' }
+    ]
+  };
+};
+
+annotate PlayerCRMService.CampaignParticipants with @(
+  UI.LineItem: [
+    { Value: player.displayName },
+    { Value: campaign.name },
+    { Value: campaign.startDate },
+    { Value: campaign.endDate }
   ]
 );
