@@ -231,6 +231,32 @@ annotate PlayerCRMService.MarketingCampaigns with @(
   UI.LineItem: [
     { Value: name },
     { Value: startDate },
-    { Value: endDate }
+    { Value: endDate },
+    { Value: description }
+  ],
+  UI.SelectionFields: [
+    name,
+    startDate
+  ],
+  UI.HeaderInfo: {
+    TypeName      : '{i18n>MarketingCampaign_typeName}',
+    TypeNamePlural: '{i18n>MarketingCampaign_typeNamePlural}',
+    Title         : { Value: name },
+    Description   : { Value: description }
+  },
+  UI.FieldGroup #Details: {
+    Data: [
+      { Value: name },
+      { Value: description },
+      { Value: startDate },
+      { Value: endDate }
+    ]
+  },
+  UI.Facets: [
+    {
+      $Type : 'UI.ReferenceFacet',
+      Label : '{i18n>Facet_details}',
+      Target: '@UI.FieldGroup#Details'
+    }
   ]
 );
