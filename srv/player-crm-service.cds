@@ -100,7 +100,13 @@ service PlayerCRMService {
 }
 
 annotate PlayerCRMService.Players with {
-  statusCode        @title: '{i18n>Players_statusCode}' @readonly;
+  statusCode        @title: '{i18n>Players_statusCode}' @readonly @Common.ValueList: {
+    CollectionPath : 'PlayerStatuses',
+    Parameters     : [
+      { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: statusCode, ValueListProperty: 'code' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'description' }
+    ]
+  };
   statusCriticality @UI.Hidden;
   ratingCriticality @UI.Hidden;
 
@@ -130,8 +136,11 @@ annotate PlayerCRMService.Players with @(
     Description   : { Value: email }
   },
   UI.SelectionFields: [
+    displayName,
+    statusCode,
     vipTier,
-    status_ID
+    averageRating,
+    balance
   ],
   UI.DataPoint #StatusPoint: {
     Value      : statusCode,
