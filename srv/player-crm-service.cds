@@ -166,21 +166,79 @@ annotate PlayerCRMService.Players with @(
       Target: '@UI.FieldGroup#Profile'
     },
     {
-      $Type : 'UI.ReferenceFacet',
-      Label : '{i18n>Facet_interactions}',
-      Target: 'interactions/@UI.LineItem'
+      $Type : 'UI.CollectionFacet',
+      Label : '{i18n>Facet_activity}',
+      ID    : 'ActivityFacet',
+      Facets: [
+        {
+          $Type : 'UI.ReferenceFacet',
+          Label : '{i18n>Facet_interactions}',
+          Target: 'interactions/@UI.LineItem'
+        },
+        {
+          $Type : 'UI.ReferenceFacet',
+          Label : '{i18n>Facet_loyalty}',
+          Target: 'loyalty/@UI.LineItem'
+        }
+      ]
     },
     {
       $Type : 'UI.ReferenceFacet',
       Label : '{i18n>Facet_feedback}',
       Target: 'feedbacks/@UI.LineItem'
-    },
-    {
-      $Type : 'UI.ReferenceFacet',
-      Label : '{i18n>Facet_loyalty}',
-      Target: 'loyalty/@UI.LineItem'
     }
-  ]
+  ],
+
+  UI.SelectionVariant #AtRisk: {
+    Text         : '{i18n>View_atRisk}',
+    SelectOptions: [
+      {
+        $Type       : 'UI.SelectOptionType',
+        PropertyName: statusCode,
+        Ranges      : [
+          { $Type: 'UI.SelectionRangeType', Sign: #I, Option: #EQ, Low: 'AtRisk' }
+        ]
+      }
+    ]
+  },
+
+  UI.SelectionVariant #Vip: {
+    Text         : '{i18n>View_vip}',
+    SelectOptions: [
+      {
+        $Type       : 'UI.SelectOptionType',
+        PropertyName: statusCode,
+        Ranges      : [
+          { $Type: 'UI.SelectionRangeType', Sign: #I, Option: #EQ, Low: 'VIP' }
+        ]
+      }
+    ]
+  },
+
+  UI.PresentationVariant #Default: {
+    Visualizations: ['@UI.LineItem'],
+    SortOrder     : [
+      { $Type: 'Common.SortOrderType', Property: displayName, Descending: false }
+    ]
+  },
+
+  UI.SelectionPresentationVariant #AllPlayers: {
+    Text               : '{i18n>View_all}',
+    PresentationVariant: ![@UI.PresentationVariant#Default],
+    SelectionVariant   : { $Type: 'UI.SelectionVariantType', SelectOptions: [] }
+  },
+
+  UI.SelectionPresentationVariant #AtRiskPlayers: {
+    Text               : '{i18n>View_atRisk}',
+    PresentationVariant: ![@UI.PresentationVariant#Default],
+    SelectionVariant   : ![@UI.SelectionVariant#AtRisk]
+  },
+
+  UI.SelectionPresentationVariant #VipPlayers: {
+    Text               : '{i18n>View_vip}',
+    PresentationVariant: ![@UI.PresentationVariant#Default],
+    SelectionVariant   : ![@UI.SelectionVariant#Vip]
+  }
 );
 
 annotate PlayerCRMService.PlayerStatuses with @(

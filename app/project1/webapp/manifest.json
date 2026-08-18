@@ -112,7 +112,23 @@
           "options": {
             "settings": {
               "contextPath": "/Players",
-              "variantManagement": "Page",
+              "variantManagement": "Control",
+              "views": {
+                "paths": [
+                  {
+                    "key": "all",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllPlayers"
+                  },
+                  {
+                    "key": "atRisk",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AtRiskPlayers"
+                  },
+                  {
+                    "key": "vip",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#VipPlayers"
+                  }
+                ]
+              },
               "navigation": {
                 "Players": {
                   "detail": {
@@ -137,7 +153,8 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/Players"
+              "contextPath": "/Players",
+              "sectionLayout": "Tabs"
             }
           }
         },
