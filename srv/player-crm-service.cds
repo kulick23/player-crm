@@ -13,20 +13,8 @@ service PlayerCRMService {
     *,
     status.code as statusCode : String(20),
 
-    case status.code
-      when 'VIP'      then 3
-      when 'Active'   then 3
-      when 'AtRisk'   then 1
-      when 'Inactive' then 2
-      else                 0
-    end as statusCriticality : Integer,
-
-    case
-      when averageRating is null then 0
-      when averageRating >= 4    then 3
-      when averageRating >= 3    then 2
-      else                            1
-    end as ratingCriticality : Integer
+    status.criticality as statusCriticality : Integer,
+    virtual null as ratingCriticality : Integer
   } actions {
     @requires: 'CRMAdmin'
     action   activateVIP(tier: String) returns Players;
@@ -84,11 +72,7 @@ service PlayerCRMService {
   ]
   entity Feedbacks as projection on playercrm.Feedback {
     *,
-    case
-      when rating >= 4 then 3
-      when rating  = 3 then 2
-      else                  1
-    end as ratingCriticality : Integer
+    virtual null as ratingCriticality : Integer
   };
 
   @restrict: [

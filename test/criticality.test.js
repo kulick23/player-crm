@@ -54,7 +54,7 @@ describe('Criticality: average player rating', () => {
     expect(data).toBeDefined();
 
     const { data: created } = await GET(
-      `${BASE}/Players?$filter=averageRating eq null&$select=ratingCriticality`
+      `${BASE}/Players?$filter=averageRating eq null&$select=averageRating,ratingCriticality`
     );
     created.value.forEach((p) => expect(p.ratingCriticality).toBe(0));
   });

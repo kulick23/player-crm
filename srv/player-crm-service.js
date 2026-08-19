@@ -8,6 +8,22 @@ const VIP_TIERS = {
 
 const isoDate = (date) => date.toISOString().slice(0, 10);
 
+const ratingCriticality = (rating) => {
+  if (rating === null || rating === undefined) return 0;
+  const value = Number(rating);
+  if (value >= 4) return 3;
+  if (value >= 3) return 2;
+  return 1;
+};
+
+const applyRatingCriticality = (rows, source) => {
+  for (const row of Array.isArray(rows) ? rows : [rows]) {
+    if (row && typeof row === 'object' && source in row) {
+      row.ratingCriticality = ratingCriticality(row[source]);
+    }
+  }
+};
+
 const syncPlayerRating = async (player_ID) => {
   if (!player_ID) return null;
 
@@ -30,6 +46,10 @@ const syncPlayerRating = async (player_ID) => {
 };
 
 module.exports = (srv) => {
+
+  srv.after('READ', 'Players', (players) => applyRatingCriticality(players, 'averageRating'));
+
+  srv.after('READ', 'Feedbacks', (feedbacks) => applyRatingCriticality(feedbacks, 'rating'));
 
   srv.after('CREATE', 'Feedbacks', async (feedback) => {
     await syncPlayerRating(feedback.player_ID);

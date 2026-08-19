@@ -19,3 +19,5 @@ mta_archives/
 @cds-models
 
 .claude
+# UI5 build output
+app/*/dist/
