@@ -24,6 +24,15 @@ const applyRatingCriticality = (rows, source) => {
   }
 };
 
+const logInteraction = async (player_ID, type, summary) => {
+  await INSERT.into(cds.entities('playercrm').Interaction).entries({
+    player_ID,
+    type,
+    date: new Date().toISOString(),
+    summary
+  });
+};
+
 const syncPlayerRating = async (player_ID) => {
   if (!player_ID) return null;
 
@@ -41,7 +50,17 @@ const syncPlayerRating = async (player_ID) => {
     if (atRisk) changes.status_ID = atRisk.ID;
   }
 
+  const player = await SELECT.one.from(db.Player).where({ ID: player_ID });
   await UPDATE(db.Player, player_ID).with(changes);
+
+  if (changes.status_ID && changes.status_ID !== player?.status_ID) {
+    await logInteraction(
+      player_ID,
+      'StatusChanged',
+      `Moved to AtRisk after a rating of ${latest.rating}`
+    );
+  }
+
   return changes;
 };
 
@@ -113,6 +132,12 @@ module.exports = (srv) => {
     });
 
     await UPDATE(db.Player, playerID).with({ vipTier: tier });
+
+    await logInteraction(
+      playerID,
+      'VipActivated',
+      `VIP subscription ${tier} activated until ${isoDate(endDate)}`
+    );
 
     return await SELECT.one.from(db.Player).where({ ID: playerID });
   });
