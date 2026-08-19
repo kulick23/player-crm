@@ -51,6 +51,14 @@ describe('Action activateVIP', () => {
     expect(loyalty.value[0].endDate).toBe(addDays(7));
   });
 
+  test('logs the activation in the interaction history', async () => {
+    const { data: before } = await GET(
+      `${BASE}/Interactions?$filter=player_ID eq ${ALEX} and type eq 'VipActivated'`
+    );
+    expect(before.value.length).toBeGreaterThan(0);
+    expect(before.value[0].summary).toContain('30days');
+  });
+
   test('an unknown tier results in price 0', async () => {
     await POST(
       `${BASE}/Players(ID=${DANILA},IsActiveEntity=true)/PlayerCRMService.activateVIP`,
@@ -100,6 +108,14 @@ describe('averageRating recalculation on new feedback', () => {
     expect(player.statusCode).toBe('AtRisk');
     expect(player.statusCriticality).toBe(1);
     expect(Number(player.averageRating)).toBe(1.5);
+  });
+
+  test('the automatic status change is logged in the interaction history', async () => {
+    const { data } = await GET(
+      `${BASE}/Interactions?$filter=player_ID eq ${ALEX} and type eq 'StatusChanged'`
+    );
+    expect(data.value).toHaveLength(1);
+    expect(data.value[0].summary).toContain('AtRisk');
   });
 
   test('feedback rated 3 or higher leaves the status unchanged', async () => {
