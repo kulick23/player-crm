@@ -132,6 +132,7 @@ annotate PlayerCRMService.Players with actions {
     title: '{i18n>Action_grantCompensation_campaign}',
     Common.ValueList: {
       CollectionPath : 'MarketingCampaigns',
+      SearchSupported: true,
       Parameters     : [
         { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: campaign_ID, ValueListProperty: 'ID' },
         { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'name' },
@@ -384,6 +385,7 @@ annotate PlayerCRMService.MarketingCampaigns with @(
 annotate PlayerCRMService.CampaignParticipants with {
   player @Common.ValueList: {
     CollectionPath : 'Players',
+    SearchSupported: true,
     Parameters     : [
       { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: player_ID, ValueListProperty: 'ID' },
       { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'displayName' },
@@ -393,6 +395,7 @@ annotate PlayerCRMService.CampaignParticipants with {
 
   campaign @Common.ValueList: {
     CollectionPath : 'MarketingCampaigns',
+    SearchSupported: true,
     Parameters     : [
       { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: campaign_ID, ValueListProperty: 'ID' },
       { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'name' },
