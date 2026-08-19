@@ -158,6 +158,6 @@ export = (srv: Service) => {
       `VIP subscription ${tier} activated until ${isoDate(endDate)}`
     );
 
-    return await SELECT.one.from(Player).where({ ID: playerID });
+    return await SELECT.one.from(srv.entities.Players).where({ ID: playerID });
   });
 };

@@ -110,6 +110,12 @@ annotate PlayerCRMService.Players with {
   };
 };
 
+annotate PlayerCRMService.Players with actions {
+  activateVIP @(Common.SideEffects: {
+    TargetEntities: [_it, _it.loyalty, _it.interactions]
+  });
+};
+
 annotate PlayerCRMService.Players with @(
   UI.LineItem: [
     { Value: displayName },
@@ -131,6 +137,13 @@ annotate PlayerCRMService.Players with @(
     vipTier,
     averageRating,
     balance
+  ],
+  UI.Identification: [
+    {
+      $Type : 'UI.DataFieldForAction',
+      Action: 'PlayerCRMService.activateVIP',
+      Label : '{i18n>Action_activateVIP}'
+    }
   ],
   UI.DataPoint #StatusPoint: {
     Value      : statusCode,
