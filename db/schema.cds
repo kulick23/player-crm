@@ -21,6 +21,7 @@ entity Player : cuid, managed {
 entity PlayerStatus : cuid {
   code        : String(20) @title: '{i18n>PlayerStatus_code}' @mandatory;
   description : String(100) @title: '{i18n>PlayerStatus_description}';
+  criticality : Integer @title: '{i18n>PlayerStatus_criticality}';
 }
 
 @title: '{i18n>Preference}'
