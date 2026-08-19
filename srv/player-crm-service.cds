@@ -14,10 +14,15 @@ service PlayerCRMService {
     status.code as statusCode : String(20),
 
     status.criticality as statusCriticality : Integer,
-    virtual null as ratingCriticality : Integer
+    virtual null as ratingCriticality : Integer,
+    virtual null as hideActivateVIP : Boolean,
+    virtual null as hideGrantCompensation : Boolean
   } actions {
     @requires: 'CRMAdmin'
     action   activateVIP(tier: String) returns Players;
+
+    @restrict: [{ grant: '*', to: ['CRMAdmin', 'SupportAgent'] }]
+    action   grantCompensation(campaign_ID: UUID, note: String) returns Players;
 
     function stats() returns PlayerStats;
   };
@@ -75,6 +80,7 @@ service PlayerCRMService {
     virtual null as ratingCriticality : Integer
   };
 
+  @odata.draft.enabled
   @restrict: [
     { grant: '*',    to: ['CRMAdmin', 'CommunityManager'] },
     { grant: 'READ', to: 'SupportAgent' }
@@ -97,8 +103,10 @@ annotate PlayerCRMService.Players with {
       { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'description' }
     ]
   };
-  statusCriticality @UI.Hidden;
-  ratingCriticality @UI.Hidden;
+  statusCriticality     @UI.Hidden;
+  ratingCriticality     @UI.Hidden;
+  hideActivateVIP       @UI.Hidden;
+  hideGrantCompensation @UI.Hidden;
 
   status @Common.ValueList: {
     CollectionPath : 'PlayerStatuses',
@@ -114,6 +122,25 @@ annotate PlayerCRMService.Players with actions {
   activateVIP @(Common.SideEffects: {
     TargetEntities: [_it, _it.loyalty, _it.interactions]
   });
+  grantCompensation @(Common.SideEffects: {
+    TargetEntities: [_it, _it.campaigns, _it.interactions, _it.loyalty]
+  });
+};
+
+annotate PlayerCRMService.Players with actions {
+  grantCompensation(campaign_ID @(
+    title: '{i18n>Action_grantCompensation_campaign}',
+    Common.ValueList: {
+      CollectionPath : 'MarketingCampaigns',
+      Parameters     : [
+        { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: campaign_ID, ValueListProperty: 'ID' },
+        { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'name' },
+        { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'reason' },
+        { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'compensationType' },
+        { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'compensationValue' }
+      ]
+    }
+  ), note @title: '{i18n>Action_grantCompensation_note}');
 };
 
 annotate PlayerCRMService.Players with @(
@@ -141,8 +168,15 @@ annotate PlayerCRMService.Players with @(
   UI.Identification: [
     {
       $Type : 'UI.DataFieldForAction',
+      Action: 'PlayerCRMService.grantCompensation',
+      Label : '{i18n>Action_grantCompensation}',
+      ![@UI.Hidden]: hideGrantCompensation
+    },
+    {
+      $Type : 'UI.DataFieldForAction',
       Action: 'PlayerCRMService.activateVIP',
-      Label : '{i18n>Action_activateVIP}'
+      Label : '{i18n>Action_activateVIP}',
+      ![@UI.Hidden]: hideActivateVIP
     }
   ],
   UI.DataPoint #StatusPoint: {
@@ -305,13 +339,16 @@ annotate PlayerCRMService.Feedbacks with @(
 annotate PlayerCRMService.MarketingCampaigns with @(
   UI.LineItem: [
     { Value: name },
+    { Value: reason },
+    { Value: compensationType },
+    { Value: compensationValue },
     { Value: startDate },
-    { Value: endDate },
-    { Value: description }
+    { Value: endDate }
   ],
   UI.SelectionFields: [
     name,
-    startDate
+    reason,
+    compensationType
   ],
   UI.HeaderInfo: {
     TypeName      : '{i18n>MarketingCampaign_typeName}',
@@ -323,6 +360,9 @@ annotate PlayerCRMService.MarketingCampaigns with @(
     Data: [
       { Value: name },
       { Value: description },
+      { Value: reason },
+      { Value: compensationType },
+      { Value: compensationValue },
       { Value: startDate },
       { Value: endDate }
     ]
@@ -336,7 +376,7 @@ annotate PlayerCRMService.MarketingCampaigns with @(
     {
       $Type : 'UI.ReferenceFacet',
       Label : '{i18n>Facet_participants}',
-      Target: 'players/@UI.LineItem'
+      Target: 'participants/@UI.LineItem'
     }
   ]
 );
@@ -365,7 +405,9 @@ annotate PlayerCRMService.CampaignParticipants with @(
   UI.LineItem: [
     { Value: player.displayName },
     { Value: campaign.name },
-    { Value: campaign.startDate },
-    { Value: campaign.endDate }
+    { Value: campaign.compensationType },
+    { Value: campaign.compensationValue },
+    { Value: createdAt },
+    { Value: note }
   ]
 );

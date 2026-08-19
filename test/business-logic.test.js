@@ -7,6 +7,10 @@ const BASE = '/odata/v4/player-crm';
 const DANILA = 'bbbbbbbb-1111-1111-1111-111111111111';
 const ALEX = 'bbbbbbbb-2222-2222-2222-222222222222';
 const MARIA = 'bbbbbbbb-3333-3333-3333-333333333333';
+const IGOR = 'bbbbbbbb-4444-4444-4444-444444444444';
+
+const SERVICE_RECOVERY = 'ffffffff-1111-1111-1111-111111111111';
+const DOWNTIME_APOLOGY = 'ffffffff-2222-2222-2222-222222222222';
 
 const addDays = (days) => {
   const d = new Date();
@@ -70,6 +74,74 @@ describe('Action activateVIP', () => {
     );
     expect(loyalty.value).toHaveLength(1);
     expect(Number(loyalty.value[0].price)).toBe(0);
+  });
+});
+
+describe('Action grantCompensation', () => {
+  const grant = (player, campaign_ID, note) =>
+    POST(
+      `${BASE}/Players(ID=${player},IsActiveEntity=true)/PlayerCRMService.grantCompensation`,
+      { campaign_ID, note }
+    );
+
+  test('a bonus campaign tops up the balance of the player', async () => {
+    const { data: before } = await GET(
+      `${BASE}/Players(ID=${IGOR},IsActiveEntity=true)?$select=balance`
+    );
+
+    const { status } = await grant(IGOR, SERVICE_RECOVERY, 'Broken case drop');
+    expect(status).toBe(200);
+
+    const { data: after } = await GET(
+      `${BASE}/Players(ID=${IGOR},IsActiveEntity=true)?$select=balance`
+    );
+    expect(Number(after.balance)).toBe(Number(before.balance) + 50);
+  });
+
+  test('the grant is recorded with the note of the agent', async () => {
+    const { data } = await GET(
+      `${BASE}/CampaignParticipants?$filter=player_ID eq ${IGOR} and campaign_ID eq ${SERVICE_RECOVERY}`
+    );
+    expect(data.value).toHaveLength(1);
+    expect(data.value[0].note).toBe('Broken case drop');
+  });
+
+  test('the grant shows up in the interaction history', async () => {
+    const { data } = await GET(
+      `${BASE}/Interactions?$filter=player_ID eq ${IGOR} and type eq 'CompensationGranted'`
+    );
+    expect(data.value).toHaveLength(1);
+    expect(data.value[0].summary).toContain('50');
+  });
+
+  test('the same campaign cannot be granted twice', async () => {
+    try {
+      await grant(IGOR, SERVICE_RECOVERY, 'Second attempt');
+      throw new Error('the duplicate grant was accepted');
+    } catch (err) {
+      expect(err.response?.status).toBe(400);
+      expect(err.response?.data?.error?.message).toContain('already been granted');
+    }
+  });
+
+  test('a VipDays campaign creates a complimentary loyalty entry', async () => {
+    await grant(MARIA, DOWNTIME_APOLOGY, 'Outage during the weekend');
+
+    const { data } = await GET(
+      `${BASE}/LoyaltyPrograms?$filter=player_ID eq ${MARIA} and tier eq '7days'`
+    );
+    expect(data.value).toHaveLength(1);
+    expect(Number(data.value[0].price)).toBe(0);
+    expect(data.value[0].perks).toContain('Downtime Apology');
+  });
+
+  test('an unknown campaign is rejected', async () => {
+    try {
+      await grant(ALEX, 'ffffffff-9999-9999-9999-999999999999');
+      throw new Error('the unknown campaign was accepted');
+    } catch (err) {
+      expect(err.response?.status).toBe(404);
+    }
   });
 });
 

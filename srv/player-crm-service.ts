@@ -28,6 +28,18 @@ const ratingCriticality = (rating: unknown): number => {
   return 1;
 };
 
+const applyActionVisibility = (rows: unknown, user: any): void => {
+  const isAdmin = user.is('CRMAdmin');
+  const isSupport = user.is('SupportAgent');
+  const list = Array.isArray(rows) ? rows : [rows];
+  for (const row of list) {
+    if (row && typeof row === 'object') {
+      (row as Record<string, unknown>).hideActivateVIP = !isAdmin;
+      (row as Record<string, unknown>).hideGrantCompensation = !(isAdmin || isSupport);
+    }
+  }
+};
+
 const applyRatingCriticality = (rows: unknown, source: string): void => {
   const list = Array.isArray(rows) ? rows : [rows];
   for (const row of list) {
@@ -82,9 +94,10 @@ const syncPlayerRating = async (player_ID?: string): Promise<PlayerChanges | nul
 };
 
 export = (srv: Service) => {
-  srv.after('READ', 'Players', (players: unknown) =>
-    applyRatingCriticality(players, 'averageRating')
-  );
+  srv.after('READ', 'Players', (players: unknown, req: Request) => {
+    applyRatingCriticality(players, 'averageRating');
+    applyActionVisibility(players, req.user);
+  });
 
   srv.after('READ', 'Feedbacks', (feedbacks: unknown) =>
     applyRatingCriticality(feedbacks, 'rating')
@@ -128,6 +141,64 @@ export = (srv: Service) => {
       .columns('ID', 'displayName', 'statusCode', 'averageRating')
       .where`averageRating < ${threshold} or statusCode = 'AtRisk'`
       .orderBy('averageRating asc');
+  });
+
+  srv.on('grantCompensation', 'Players', async (req: Request) => {
+    const { Player, MarketingCampaign, PlayerCampaigns, LoyaltyProgram } = cds.entities('playercrm');
+    const { ID: playerID } = req.params[0] as { ID: string };
+    const campaign_ID = req.data.campaign_ID as string;
+    const note = req.data.note as string;
+
+    const campaign = await SELECT.one.from(MarketingCampaign).where({ ID: campaign_ID });
+    if (!campaign) return req.reject(404, `Campaign ${campaign_ID} not found`);
+
+    const player = await SELECT.one.from(Player).where({ ID: playerID });
+    if (!player) return req.reject(404, `Player ${playerID} not found`);
+
+    const granted = await SELECT.one
+      .from(PlayerCampaigns)
+      .where({ player_ID: playerID, campaign_ID });
+    if (granted) {
+      return req.reject(400, `${campaign.name} has already been granted to this player`);
+    }
+
+    const value = Number(campaign.compensationValue ?? 0);
+    let summary = `${campaign.name} granted`;
+
+    if (campaign.compensationType === 'Bonus') {
+      await UPDATE(Player, playerID).with({ balance: Number(player.balance ?? 0) + value });
+      summary = `${campaign.name}: ${value} added to the balance`;
+    }
+
+    if (campaign.compensationType === 'VipDays') {
+      const startDate = new Date();
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + value);
+
+      await INSERT.into(LoyaltyProgram).entries({
+        player_ID: playerID,
+        tier: `${value}days`,
+        startDate: isoDate(startDate),
+        endDate: isoDate(endDate),
+        price: 0,
+        perks: `Complimentary access granted by ${campaign.name}`
+      });
+      summary = `${campaign.name}: ${value} complimentary VIP days`;
+    }
+
+    if (campaign.compensationType === 'Discount') {
+      summary = `${campaign.name}: ${value}% discount on the next purchase`;
+    }
+
+    await INSERT.into(PlayerCampaigns).entries({
+      player_ID: playerID,
+      campaign_ID,
+      note: note || null
+    });
+
+    await logInteraction(playerID, 'CompensationGranted', summary);
+
+    return await SELECT.one.from(srv.entities.Players).where({ ID: playerID });
   });
 
   srv.on('activateVIP', 'Players', async (req: Request) => {
