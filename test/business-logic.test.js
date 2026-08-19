@@ -128,10 +128,10 @@ describe('Action grantCompensation', () => {
     await grant(MARIA, DOWNTIME_APOLOGY, 'Outage during the weekend');
 
     const { data } = await GET(
-      `${BASE}/LoyaltyPrograms?$filter=player_ID eq ${MARIA} and tier eq '7days'`
+      `${BASE}/LoyaltyPrograms?$filter=player_ID eq ${MARIA} and price eq 0`
     );
     expect(data.value).toHaveLength(1);
-    expect(Number(data.value[0].price)).toBe(0);
+    expect(data.value[0].tier).toBe('7days');
     expect(data.value[0].perks).toContain('Downtime Apology');
   });
 
