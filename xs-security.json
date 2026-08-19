@@ -20,19 +20,25 @@
     {
       "name": "CRMAdmin",
       "description": "CRM Administrator",
-      "scope-references": ["$XSAPPNAME.CRMAdmin"],
+      "scope-references": [
+        "$XSAPPNAME.CRMAdmin"
+      ],
       "attribute-references": []
     },
     {
       "name": "SupportAgent",
       "description": "Support Agent",
-      "scope-references": ["$XSAPPNAME.SupportAgent"],
+      "scope-references": [
+        "$XSAPPNAME.SupportAgent"
+      ],
       "attribute-references": []
     },
     {
       "name": "CommunityManager",
       "description": "Community Manager",
-      "scope-references": ["$XSAPPNAME.CommunityManager"],
+      "scope-references": [
+        "$XSAPPNAME.CommunityManager"
+      ],
       "attribute-references": []
     }
   ],
@@ -40,17 +46,23 @@
     {
       "name": "PlayerCRM_Admin",
       "description": "Player CRM administrator",
-      "role-template-references": ["$XSAPPNAME.CRMAdmin"]
+      "role-template-references": [
+        "$XSAPPNAME.CRMAdmin"
+      ]
     },
     {
       "name": "PlayerCRM_Support",
       "description": "Player CRM support agent",
-      "role-template-references": ["$XSAPPNAME.SupportAgent"]
+      "role-template-references": [
+        "$XSAPPNAME.SupportAgent"
+      ]
     },
     {
       "name": "PlayerCRM_Community",
       "description": "Player CRM community manager",
-      "role-template-references": ["$XSAPPNAME.CommunityManager"]
+      "role-template-references": [
+        "$XSAPPNAME.CommunityManager"
+      ]
     }
   ]
 }
