@@ -13,7 +13,7 @@ entity Player : cuid, managed {
   interactions  : Composition of many Interaction on interactions.player = $self;
   loyalty       : Composition of many LoyaltyProgram on loyalty.player = $self;
   feedbacks     : Composition of many Feedback on feedbacks.player = $self;
-  campaigns     : Composition of many PlayerCampaigns on campaigns.player = $self;
+  campaigns     : Association to many PlayerCampaigns on campaigns.player = $self;
   averageRating : Decimal(2,1) @title: '{i18n>Player_averageRating}' @readonly;
 }
 
@@ -59,15 +59,19 @@ entity Feedback : cuid, managed {
 
 @title: '{i18n>MarketingCampaign}'
 entity MarketingCampaign : cuid, managed {
-  name        : String(100) @title: '{i18n>MarketingCampaign_name}';
-  startDate   : Date @title: '{i18n>MarketingCampaign_startDate}';
-  endDate     : Date @title: '{i18n>MarketingCampaign_endDate}';
-  description : String(200) @title: '{i18n>MarketingCampaign_description}';
-  players     : Association to many PlayerCampaigns on players.campaign = $self;
+  name              : String(100) @title: '{i18n>MarketingCampaign_name}' @mandatory;
+  description       : String(200) @title: '{i18n>MarketingCampaign_description}';
+  startDate         : Date @title: '{i18n>MarketingCampaign_startDate}';
+  endDate           : Date @title: '{i18n>MarketingCampaign_endDate}';
+  reason            : String(30) @title: '{i18n>MarketingCampaign_reason}';
+  compensationType  : String(20) @title: '{i18n>MarketingCampaign_compensationType}';
+  compensationValue : Decimal(10,2) @title: '{i18n>MarketingCampaign_compensationValue}';
+  participants      : Composition of many PlayerCampaigns on participants.campaign = $self;
 }
 
 @title: '{i18n>PlayerCampaigns}'
-entity PlayerCampaigns : cuid {
+entity PlayerCampaigns : cuid, managed {
   player   : Association to Player @title: '{i18n>PlayerCampaigns_player}';
   campaign : Association to MarketingCampaign @title: '{i18n>PlayerCampaigns_campaign}';
+  note     : String(200) @title: '{i18n>PlayerCampaigns_note}';
 }

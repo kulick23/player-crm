@@ -79,6 +79,15 @@ describe('Authorization: SupportAgent', () => {
     expect(status).toBe(200);
   });
 
+  test('can grant a compensation to a player', async () => {
+    const { status } = await POST(
+      `${BASE}/Players(ID=${ALEX},IsActiveEntity=true)/PlayerCRMService.grantCompensation`,
+      { campaign_ID: 'ffffffff-3333-3333-3333-333333333333', note: 'Player went quiet' },
+      as('support')
+    );
+    expect(status).toBe(200);
+  });
+
   test('can edit a player and log an interaction through a draft', async () => {
     const edit = await POST(
       `${BASE}/Players(ID=${ALEX},IsActiveEntity=true)/PlayerCRMService.draftEdit`,
@@ -138,5 +147,39 @@ describe('Authorization: CommunityManager', () => {
       as('community')
     );
     expect(status).toBe(403);
+  });
+
+  test('cannot grant a compensation', async () => {
+    const { status } = await POST(
+      `${BASE}/Players(ID=${ALEX},IsActiveEntity=true)/PlayerCRMService.grantCompensation`,
+      { campaign_ID: 'ffffffff-1111-1111-1111-111111111111' },
+      as('community')
+    );
+    expect(status).toBe(403);
+  });
+
+  test('can add participants through the campaign draft', async () => {
+    const campaign = 'ffffffff-4444-4444-4444-444444444444';
+
+    const edit = await POST(
+      `${BASE}/MarketingCampaigns(ID=${campaign},IsActiveEntity=true)/PlayerCRMService.draftEdit`,
+      { PreserveChanges: true },
+      as('community')
+    );
+    expect(edit.status).toBe(201);
+
+    const added = await POST(
+      `${BASE}/MarketingCampaigns(ID=${campaign},IsActiveEntity=false)/participants`,
+      { player_ID: MARIA, note: 'Selected for the discount wave' },
+      as('community')
+    );
+    expect(added.status).toBe(201);
+
+    const saved = await POST(
+      `${BASE}/MarketingCampaigns(ID=${campaign},IsActiveEntity=false)/PlayerCRMService.draftActivate`,
+      {},
+      as('community')
+    );
+    expect(saved.status).toBe(200);
   });
 });
