@@ -69,6 +69,20 @@ entity MarketingCampaign : cuid, managed {
   participants      : Composition of many PlayerCampaigns on participants.campaign = $self;
 }
 
+@title: '{i18n>CompensationType}'
+entity CompensationType {
+  key code    : String(20) @title: '{i18n>CompensationType_code}';
+  name        : String(50) @title: '{i18n>CompensationType_name}';
+  description : String(100) @title: '{i18n>CompensationType_description}';
+}
+
+@title: '{i18n>CampaignReason}'
+entity CampaignReason {
+  key code    : String(30) @title: '{i18n>CampaignReason_code}';
+  name        : String(50) @title: '{i18n>CampaignReason_name}';
+  description : String(100) @title: '{i18n>CampaignReason_description}';
+}
+
 @title: '{i18n>PlayerCampaigns}'
 entity PlayerCampaigns : cuid, managed {
   player   : Association to Player @title: '{i18n>PlayerCampaigns_player}';

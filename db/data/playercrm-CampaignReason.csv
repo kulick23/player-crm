@@ -1,0 +1,5 @@
+code;name;description
+LowRating;Poor experience;The player rated the service below three
+TechnicalIssue;Technical issue;Outage, broken drop or another platform failure
+Churn;Player went quiet;No activity for a long period
+PaymentFailure;Payment failed;A purchase attempt did not go through

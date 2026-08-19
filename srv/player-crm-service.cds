@@ -93,6 +93,12 @@ service PlayerCRMService {
   ]
   entity CampaignParticipants as projection on playercrm.PlayerCampaigns;
 
+  @readonly
+  entity CompensationTypes as projection on playercrm.CompensationType;
+
+  @readonly
+  entity CampaignReasons as projection on playercrm.CampaignReason;
+
 }
 
 annotate PlayerCRMService.Players with {
@@ -336,6 +342,28 @@ annotate PlayerCRMService.Feedbacks with @(
     { Value: feedbackDate }
   ]
 );
+
+annotate PlayerCRMService.MarketingCampaigns with {
+  compensationType @Common.ValueList: {
+    CollectionPath              : 'CompensationTypes',
+    Label                       : '{i18n>MarketingCampaign_compensationType}',
+    Parameters                  : [
+      { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: compensationType, ValueListProperty: 'code' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'name' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'description' }
+    ]
+  } @Common.ValueListWithFixedValues;
+
+  reason @Common.ValueList: {
+    CollectionPath              : 'CampaignReasons',
+    Label                       : '{i18n>MarketingCampaign_reason}',
+    Parameters                  : [
+      { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: reason, ValueListProperty: 'code' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'name' },
+      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'description' }
+    ]
+  } @Common.ValueListWithFixedValues;
+};
 
 annotate PlayerCRMService.MarketingCampaigns with @(
   UI.LineItem: [

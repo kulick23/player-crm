@@ -175,14 +175,16 @@ export = (srv: Service) => {
       const endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + value);
 
+      const tier = `${value}days`;
       await INSERT.into(LoyaltyProgram).entries({
         player_ID: playerID,
-        tier: `${value}days`,
+        tier,
         startDate: isoDate(startDate),
         endDate: isoDate(endDate),
         price: 0,
         perks: `Complimentary access granted by ${campaign.name}`
       });
+      await UPDATE(Player, playerID).with({ vipTier: tier });
       summary = `${campaign.name}: ${value} complimentary VIP days`;
     }
 

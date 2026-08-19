@@ -1,0 +1,4 @@
+code;name;description
+Bonus;Balance bonus;A fixed amount added to the balance of the player
+VipDays;Complimentary VIP;Free VIP subscription days, the value is the number of days
+Discount;Discount;Percentage off the next purchase
