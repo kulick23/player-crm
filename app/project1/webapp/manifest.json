@@ -140,6 +140,18 @@
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
                     "type": "ResponsiveTable"
+                  },
+                  "actions": {
+                    "openCampaigns": {
+                      "press": "project1.ext.controller.Navigation.toCampaigns",
+                      "text": "{i18n>navToCampaigns}",
+                      "enabled": true,
+                      "visible": true,
+                      "position": {
+                        "placement": "After",
+                        "anchor": "Create"
+                      }
+                    }
                   }
                 }
               }
@@ -177,6 +189,18 @@
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
                     "type": "ResponsiveTable"
+                  },
+                  "actions": {
+                    "openPlayers": {
+                      "press": "project1.ext.controller.Navigation.toPlayers",
+                      "text": "{i18n>navToPlayers}",
+                      "enabled": true,
+                      "visible": true,
+                      "position": {
+                        "placement": "After",
+                        "anchor": "Create"
+                      }
+                    }
                   }
                 }
               }
