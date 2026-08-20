@@ -21,3 +21,5 @@ mta_archives/
 .claude
 # UI5 build output
 app/*/dist/
+
+conspects
