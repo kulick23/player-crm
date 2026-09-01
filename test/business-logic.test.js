@@ -63,17 +63,22 @@ describe('Action activateVIP', () => {
     expect(before.value[0].summary).toContain('30days');
   });
 
-  test('an unknown tier results in price 0', async () => {
-    await POST(
-      `${BASE}/Players(ID=${DANILA},IsActiveEntity=true)/PlayerCRMService.activateVIP`,
-      { tier: 'lifetime' }
-    );
+  test('an unknown tier is rejected before any subscription is created', async () => {
+    try {
+      await POST(
+        `${BASE}/Players(ID=${DANILA},IsActiveEntity=true)/PlayerCRMService.activateVIP`,
+        { tier: 'lifetime' }
+      );
+      throw new Error('the unknown tier was accepted');
+    } catch (err) {
+      expect(err.response?.status).toBe(400);
+      expect(err.response?.data?.error?.message).toContain('Unknown VIP tier');
+    }
 
     const { data: loyalty } = await GET(
       `${BASE}/LoyaltyPrograms?$filter=player_ID eq ${DANILA} and tier eq 'lifetime'`
     );
-    expect(loyalty.value).toHaveLength(1);
-    expect(Number(loyalty.value[0].price)).toBe(0);
+    expect(loyalty.value).toHaveLength(0);
   });
 });
 
@@ -188,6 +193,34 @@ describe('averageRating recalculation on new feedback', () => {
     );
     expect(data.value).toHaveLength(1);
     expect(data.value[0].summary).toContain('AtRisk');
+  });
+
+  test('the player leaves AtRisk once the average rating recovers', async () => {
+    await addFeedbackViaDraft(ALEX, { rating: 5, comment: 'Much better' });
+    await addFeedbackViaDraft(ALEX, { rating: 5, comment: 'Great support' });
+
+    const { data: player } = await GET(
+      `${BASE}/Players(ID=${ALEX},IsActiveEntity=true)?$select=statusCode,statusCriticality,averageRating`
+    );
+    expect(Number(player.averageRating)).toBeGreaterThanOrEqual(3);
+    expect(player.statusCode).not.toBe('AtRisk');
+    expect(player.statusCriticality).toBe(3);
+  });
+
+  test('a player holding a subscription returns to VIP rather than Active', async () => {
+    const { data: player } = await GET(
+      `${BASE}/Players(ID=${ALEX},IsActiveEntity=true)?$select=statusCode,vipTier`
+    );
+    expect(player.vipTier).toBeTruthy();
+    expect(player.statusCode).toBe('VIP');
+  });
+
+  test('the recovery is logged in the interaction history as well', async () => {
+    const { data } = await GET(
+      `${BASE}/Interactions?$filter=player_ID eq ${ALEX} and type eq 'StatusChanged'`
+    );
+    expect(data.value).toHaveLength(2);
+    expect(data.value.some((i) => i.summary.includes('VIP'))).toBe(true);
   });
 
   test('feedback rated 3 or higher leaves the status unchanged', async () => {

@@ -18,6 +18,8 @@ const VIP_TIERS: Record<Tier, TierDefinition> = {
   '90days': { price: 599.0, days: 90 }
 };
 
+const AT_RISK_THRESHOLD = 3;
+
 const isoDate = (date: Date): string => date.toISOString().slice(0, 10);
 
 const ratingCriticality = (rating: unknown): number => {
@@ -68,25 +70,35 @@ const syncPlayerRating = async (player_ID?: string): Promise<PlayerChanges | nul
   const feedbacks = await SELECT.from(Feedback).where({ player_ID });
   if (!feedbacks.length) return null;
 
-  const changes: PlayerChanges = {
-    averageRating:
-      feedbacks.reduce((sum: number, f: any) => sum + f.rating, 0) / feedbacks.length
-  };
+  const player = await SELECT.one.from(Player).where({ ID: player_ID });
+  if (!player) return null;
 
-  const latest = feedbacks.reduce((a: any, b: any) => (a.createdAt > b.createdAt ? a : b));
-  if (latest.rating < 3) {
-    const atRisk = await SELECT.one.from(PlayerStatus).where({ code: 'AtRisk' });
-    if (atRisk) changes.status_ID = atRisk.ID;
+  const total = feedbacks.reduce((sum: number, f: any) => sum + f.rating, 0);
+  const averageRating = Math.round((total / feedbacks.length) * 10) / 10;
+  const changes: PlayerChanges = { averageRating };
+
+  const current = await SELECT.one.from(PlayerStatus).where({ ID: player.status_ID });
+  const targetCode =
+    averageRating < AT_RISK_THRESHOLD
+      ? 'AtRisk'
+      : current?.code === 'AtRisk'
+        ? player.vipTier
+          ? 'VIP'
+          : 'Active'
+        : null;
+
+  if (targetCode && targetCode !== current?.code) {
+    const target = await SELECT.one.from(PlayerStatus).where({ code: targetCode });
+    if (target) changes.status_ID = target.ID;
   }
 
-  const player = await SELECT.one.from(Player).where({ ID: player_ID });
   await UPDATE(Player, player_ID).with(changes);
 
-  if (changes.status_ID && changes.status_ID !== player?.status_ID) {
+  if (changes.status_ID) {
     await logInteraction(
       player_ID,
       'StatusChanged',
-      `Moved to AtRisk after a rating of ${latest.rating}`
+      `Moved to ${targetCode} after the average rating changed to ${averageRating.toFixed(1)}`
     );
   }
 
@@ -143,17 +155,25 @@ export = (srv: Service) => {
       .orderBy('averageRating asc');
   });
 
-  srv.on('grantCompensation', 'Players', async (req: Request) => {
-    const { Player, MarketingCampaign, PlayerCampaigns, LoyaltyProgram } = cds.entities('playercrm');
+  srv.before('activateVIP', 'Players', (req: Request) => {
+    const tier = req.data.tier as string;
+    if (!tier || !(tier in VIP_TIERS)) {
+      return req.reject(
+        400,
+        `Unknown VIP tier "${tier}". Expected one of: ${Object.keys(VIP_TIERS).join(', ')}`
+      );
+    }
+  });
+
+  srv.before('grantCompensation', 'Players', async (req: Request) => {
+    const { MarketingCampaign, PlayerCampaigns } = cds.entities('playercrm');
     const { ID: playerID } = req.params[0] as { ID: string };
     const campaign_ID = req.data.campaign_ID as string;
-    const note = req.data.note as string;
+
+    if (!campaign_ID) return req.reject(400, 'A campaign has to be selected');
 
     const campaign = await SELECT.one.from(MarketingCampaign).where({ ID: campaign_ID });
     if (!campaign) return req.reject(404, `Campaign ${campaign_ID} not found`);
-
-    const player = await SELECT.one.from(Player).where({ ID: playerID });
-    if (!player) return req.reject(404, `Player ${playerID} not found`);
 
     const granted = await SELECT.one
       .from(PlayerCampaigns)
@@ -161,6 +181,18 @@ export = (srv: Service) => {
     if (granted) {
       return req.reject(400, `${campaign.name} has already been granted to this player`);
     }
+  });
+
+  srv.on('grantCompensation', 'Players', async (req: Request) => {
+    const { Player, MarketingCampaign, PlayerCampaigns, LoyaltyProgram } = cds.entities('playercrm');
+    const { ID: playerID } = req.params[0] as { ID: string };
+    const campaign_ID = req.data.campaign_ID as string;
+    const note = req.data.note as string;
+
+    const campaign = await SELECT.one.from(MarketingCampaign).where({ ID: campaign_ID });
+
+    const player = await SELECT.one.from(Player).where({ ID: playerID });
+    if (!player) return req.reject(404, `Player ${playerID} not found`);
 
     const value = Number(campaign.compensationValue ?? 0);
     let summary = `${campaign.name} granted`;
