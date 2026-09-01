@@ -30,7 +30,8 @@
     "testTimeout": 30000,
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/app/"
+      "/app/",
+      "/gen/"
     ],
     "moduleFileExtensions": [
       "js",
