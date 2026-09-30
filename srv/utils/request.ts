@@ -9,6 +9,12 @@ export const boundPlayerID = (req: Request): string => {
   return ID;
 };
 
+export const campaignIDFrom = (req: Request): string => {
+  const campaignID = req.data.campaign_ID as string | undefined;
+  if (!campaignID) req.reject(400, 'A campaign has to be selected');
+  return campaignID;
+};
+
 export const readPlayer = async (
   srv: Service,
   tx: Transaction,
