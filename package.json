@@ -33,6 +33,9 @@
       "/app/",
       "/gen/"
     ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/gen/"
+    ],
     "moduleFileExtensions": [
       "js",
       "ts",
