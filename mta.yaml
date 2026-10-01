@@ -27,6 +27,7 @@ modules:
     requires:
       - name: player-crm-auth
       - name: player-crm-db
+      - name: player-crm-destination
 
   - name: player-crm-db-deployer
     type: hdb
@@ -122,3 +123,8 @@ resources:
     parameters:
       service: html5-apps-repo
       service-plan: app-runtime
+  - name: player-crm-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite

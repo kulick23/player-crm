@@ -7,6 +7,7 @@ import { findCampaign, findPlayerCampaign } from './repositories/campaign-reposi
 import { findPlayer } from './repositories/player-repository';
 import { activateVIP } from './services/vip-service';
 import { grantCompensation } from './services/compensation-service';
+import { getOrderSummary } from './services/order-integration-service';
 import { getPlayerStats } from './services/player-query-service';
 import { syncPlayerRating } from './services/player-rating-service';
 import { boundPlayerID, campaignIDFrom, readPlayer } from './utils/request';
@@ -39,6 +40,10 @@ export = (srv: Service) => {
     const stats = await getPlayerStats(cds.tx(req), playerID);
     if (!stats) return req.reject(404, `Player ${playerID} not found`);
     return stats;
+  });
+
+  srv.on('orderSummary', 'Players', async (req: Request) => {
+    return getOrderSummary(boundPlayerID(req));
   });
 
   srv.on('atRiskPlayers', async (req: Request) => {

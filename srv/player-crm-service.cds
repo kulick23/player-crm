@@ -25,6 +25,7 @@ service PlayerCRMService {
     action   grantCompensation(campaign_ID: UUID, note: String) returns Players;
 
     function stats() returns PlayerStats;
+    function orderSummary() returns OrderSummary;
   };
 
   function atRiskPlayers(minRating: Decimal(2,1)) returns array of PlayerSummary;
@@ -42,6 +43,13 @@ service PlayerCRMService {
     displayName   : String(100);
     statusCode    : String(20);
     averageRating : Decimal(2,1);
+  }
+
+  type OrderSummary {
+    orderCount     : Integer;
+    totalSpent     : Decimal(10,2);
+    paidOrderCount : Integer;
+    lastOrderDate  : DateTime;
   }
 
   @restrict: [
