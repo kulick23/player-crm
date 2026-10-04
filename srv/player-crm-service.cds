@@ -16,10 +16,14 @@ service PlayerCRMService {
     status.criticality as statusCriticality : Integer,
     virtual null as ratingCriticality : Integer,
     virtual null as hideActivateVIP : Boolean,
+    virtual null as hideCancelVIP : Boolean,
     virtual null as hideGrantCompensation : Boolean
   } actions {
     @requires: 'CRMAdmin'
     action   activateVIP(tier: String) returns Players;
+
+    @requires: 'CRMAdmin'
+    action   cancelVIP() returns Players;
 
     @restrict: [{ grant: '*', to: ['CRMAdmin', 'SupportAgent'] }]
     action   grantCompensation(campaign_ID: UUID, note: String) returns Players;
@@ -50,6 +54,15 @@ service PlayerCRMService {
     totalSpent     : Decimal(10,2);
     paidOrderCount : Integer;
     lastOrderDate  : DateTime;
+  }
+
+  @readonly
+  @cds.persistence.skip
+  entity VIPDurations {
+    key code : String(20);
+        label : String(50);
+        days  : Integer;
+        price : Decimal(10,2);
   }
 
   @restrict: [
@@ -87,6 +100,31 @@ service PlayerCRMService {
     *,
     virtual null as ratingCriticality : Integer
   };
+
+  @restrict: [
+    { grant: ['READ', 'resolveIssue'], to: ['CRMAdmin', 'SupportAgent'] },
+    { grant: 'READ', to: 'CommunityManager' }
+  ]
+  entity OrderIssues as projection on playercrm.OrderIssue {
+    *,
+    player.displayName as playerName : String(100),
+    category.name as categoryName : String(100),
+    status.code as statusCode : String(20),
+    status.name as statusName : String(100),
+    status.criticality as statusCriticality : Integer
+  } actions {
+    @restrict: [{ grant: '*', to: ['CRMAdmin', 'SupportAgent'] }]
+    action resolveIssue(
+      resolutionNote: String(1000),
+      campaign_ID: UUID
+    ) returns OrderIssues;
+  };
+
+  @readonly
+  entity OrderIssueCategories as projection on playercrm.OrderIssueCategory;
+
+  @readonly
+  entity OrderIssueStatuses as projection on playercrm.OrderIssueStatus;
 
   @odata.draft.enabled
   @restrict: [

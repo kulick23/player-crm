@@ -12,7 +12,9 @@ import {
 } from '../repositories/player-repository';
 import { logInteraction } from './interaction-service';
 
-export type PlayerChanges = Pick<Player, 'averageRating' | 'status_ID'>;
+export type PlayerChanges = Pick<Player, 'averageRating' | 'status_ID'> & {
+  statusCode?: string;
+};
 
 export const syncPlayerRating = async (
   tx: Transaction,
@@ -37,10 +39,14 @@ export const syncPlayerRating = async (
 
   if (targetCode && targetCode !== currentStatus?.code) {
     const targetStatus = await findStatusByCode(tx, targetCode);
-    if (targetStatus?.ID) changes.status_ID = targetStatus.ID;
+    if (targetStatus?.ID) {
+      changes.status_ID = targetStatus.ID;
+      changes.statusCode = targetCode;
+    }
   }
 
-  await updatePlayer(tx, playerID, changes);
+  const { statusCode: _statusCode, ...persistedChanges } = changes;
+  await updatePlayer(tx, playerID, persistedChanges);
 
   if (changes.status_ID && targetCode) {
     await logInteraction(

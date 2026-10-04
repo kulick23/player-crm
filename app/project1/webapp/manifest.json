@@ -102,6 +102,16 @@
           "pattern": "MarketingCampaigns({key}):?query:",
           "name": "MarketingCampaignsObjectPage",
           "target": "MarketingCampaignsObjectPage"
+        },
+        {
+          "pattern": "OrderIssues:?query:",
+          "name": "OrderIssuesList",
+          "target": "OrderIssuesList"
+        },
+        {
+          "pattern": "OrderIssues({key}):?query:",
+          "name": "OrderIssuesObjectPage",
+          "target": "OrderIssuesObjectPage"
         }
       ],
       "targets": {
@@ -150,6 +160,16 @@
                       "position": {
                         "placement": "After",
                         "anchor": "Create"
+                      }
+                    },
+                    "openIssues": {
+                      "press": "project1.ext.controller.Navigation.toIssues",
+                      "text": "{i18n>navToIssues}",
+                      "enabled": true,
+                      "visible": true,
+                      "position": {
+                        "placement": "After",
+                        "anchor": "openCampaigns"
                       }
                     }
                   }
@@ -215,6 +235,48 @@
             "settings": {
               "editableHeaderContent": false,
               "contextPath": "/MarketingCampaigns"
+            }
+          }
+        },
+        "OrderIssuesList": {
+          "type": "Component",
+          "id": "OrderIssuesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/OrderIssues",
+              "variantManagement": "Page",
+              "navigation": {
+                "OrderIssues": {
+                  "detail": {
+                    "route": "OrderIssuesObjectPage"
+                  }
+                }
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": { "type": "ResponsiveTable" },
+                  "actions": {
+                    "openPlayers": {
+                      "press": "project1.ext.controller.Navigation.toPlayers",
+                      "text": "{i18n>navToPlayers}",
+                      "enabled": true,
+                      "visible": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "OrderIssuesObjectPage": {
+          "type": "Component",
+          "id": "OrderIssuesObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/OrderIssues"
             }
           }
         }

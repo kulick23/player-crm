@@ -55,6 +55,31 @@ describe('Action activateVIP', () => {
     expect(loyalty.value[0].endDate).toBe(addDays(7));
   });
 
+  test('sets the player status to VIP and adds days to an active subscription', async () => {
+    const { data } = await POST(
+      `${BASE}/Players(ID=${ALEX},IsActiveEntity=true)/PlayerCRMService.activateVIP`,
+      { tier: '7days' }
+    );
+
+    expect(data.statusCode).toBe('VIP');
+    expect(data.vipTier).toBe('37days');
+
+    const { data: loyalty } = await GET(
+      `${BASE}/LoyaltyPrograms?$filter=player_ID eq ${ALEX}&$orderby=endDate desc`
+    );
+    expect(loyalty.value[0].endDate).toBe(addDays(37));
+  });
+
+  test('cancels VIP and restores the status based on the player rating', async () => {
+    const { data } = await POST(
+      `${BASE}/Players(ID=${MARIA},IsActiveEntity=true)/PlayerCRMService.cancelVIP`,
+      {}
+    );
+
+    expect(data.vipTier).toBeNull();
+    expect(data.statusCode).toBe('Active');
+  });
+
   test('logs the activation in the interaction history', async () => {
     const { data: before } = await GET(
       `${BASE}/Interactions?$filter=player_ID eq ${ALEX} and type eq 'VipActivated'`

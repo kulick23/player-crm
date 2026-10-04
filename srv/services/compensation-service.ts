@@ -2,11 +2,10 @@ import { Transaction } from '@sap/cds';
 import type { MarketingCampaign } from '#cds-models/playercrm';
 
 import { COMPENSATION_TYPES } from '../domain/compensation';
-import { addDays, isoDate } from '../domain/dates';
-import { createLoyaltyEntry } from '../repositories/activity-repository';
 import { createPlayerCampaign } from '../repositories/campaign-repository';
 import { updatePlayer } from '../repositories/player-repository';
 import { logInteraction } from './interaction-service';
+import { extendVIP } from './vip-service';
 
 interface CompensationInput {
   campaign: MarketingCampaign;
@@ -29,20 +28,15 @@ const vipDaysSummary = async (
   input: CompensationInput,
   value: number
 ): Promise<string> => {
-  const startDate = new Date();
-  const endDate = addDays(startDate, value);
   const tier = `${value}days`;
 
-  await createLoyaltyEntry(tx, {
-    player_ID: input.playerID,
+  const { endDate } = await extendVIP(tx, input.playerID, {
+    days: value,
     tier,
-    startDate: isoDate(startDate),
-    endDate: isoDate(endDate),
     price: 0,
     perks: `Complimentary access granted by ${input.campaign.name}`
   });
-  await updatePlayer(tx, input.playerID, { vipTier: tier });
-  return `${input.campaign.name}: ${value} complimentary VIP days`;
+  return `${input.campaign.name}: ${value} complimentary VIP days, extended until ${endDate}`;
 };
 
 const applyCompensation = async (

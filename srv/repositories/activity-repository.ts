@@ -3,7 +3,7 @@ import type { Feedback, Interaction, LoyaltyProgram } from '#cds-models/playercr
 
 import { ENTITIES } from './entities';
 
-const { INSERT, SELECT } = cds.ql;
+const { INSERT, SELECT, UPDATE } = cds.ql;
 
 export const findFeedbacks = async (
   tx: Transaction,
@@ -34,9 +34,43 @@ export const createInteraction = async (
   await tx.run(INSERT.into(ENTITIES.interaction).entries(entry));
 };
 
+export const createFeedback = async (
+  tx: Transaction,
+  entry: Pick<Feedback, 'player_ID' | 'rating' | 'comment' | 'feedbackDate'>
+): Promise<void> => {
+  await tx.run(INSERT.into(ENTITIES.feedback).entries(entry));
+};
+
 export const createLoyaltyEntry = async (
   tx: Transaction,
   entry: Pick<LoyaltyProgram, 'player_ID' | 'tier' | 'startDate' | 'endDate' | 'price' | 'perks'>
 ): Promise<void> => {
   await tx.run(INSERT.into(ENTITIES.loyaltyProgram).entries(entry));
+};
+
+export const findLatestActiveLoyaltyEndDate = async (
+  tx: Transaction,
+  playerID: string,
+  today: string
+): Promise<string | null> => {
+  const entry = (await tx.run(
+    SELECT.one
+      .from(ENTITIES.loyaltyProgram)
+      .columns('endDate')
+      .where`player_ID = ${playerID} and endDate >= ${today}`
+      .orderBy('endDate desc')
+  )) as Pick<LoyaltyProgram, 'endDate'> | undefined;
+  return entry?.endDate ?? null;
+};
+
+export const expireActiveLoyaltyEntries = async (
+  tx: Transaction,
+  playerID: string,
+  today: string
+): Promise<void> => {
+  await tx.run(
+    UPDATE.entity(ENTITIES.loyaltyProgram)
+      .set({ endDate: today })
+      .where`player_ID = ${playerID} and endDate > ${today}`
+  );
 };

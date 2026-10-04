@@ -24,6 +24,7 @@ export const applyActionVisibility = (rows: unknown, user: RoleAwareUser): void 
 
   for (const row of rowsOf(rows)) {
     row.hideActivateVIP = !isAdmin;
+    row.hideCancelVIP = !isAdmin || !row.vipTier;
     row.hideGrantCompensation = !canGrantCompensation;
   }
 };

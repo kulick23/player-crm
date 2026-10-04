@@ -8,6 +8,10 @@ sap.ui.define([], function () {
 
         toPlayers: function () {
             window.location.hash = "#/";
+        },
+
+        toIssues: function () {
+            window.location.hash = "#/OrderIssues";
         }
     };
 });

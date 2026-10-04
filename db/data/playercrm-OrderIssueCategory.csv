@@ -1,0 +1,6 @@
+code;name
+PRODUCT_NOT_RECEIVED;Product not received
+PRODUCT_NOT_WORKING;Product does not work
+WRONG_PRODUCT;Wrong product
+PAYMENT_PROBLEM;Payment problem
+OTHER;Other problem

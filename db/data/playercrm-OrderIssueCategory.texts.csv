@@ -1,0 +1,6 @@
+locale;code;name
+ru;PRODUCT_NOT_RECEIVED;Товар не получен
+ru;PRODUCT_NOT_WORKING;Товар не работает
+ru;WRONG_PRODUCT;Получен не тот товар
+ru;PAYMENT_PROBLEM;Проблема с оплатой
+ru;OTHER;Другая проблема
