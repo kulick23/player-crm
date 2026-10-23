@@ -17,3 +17,9 @@ mta_archives/
 
 # @cap-js/cds-typer
 @cds-models
+
+.claude
+# UI5 build output
+app/*/dist/
+
+conspects

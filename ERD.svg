@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="490" viewBox="0 0 680 490" role="img" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<title>Player CRM data model</title>
+<desc>Ten entities: the player at the centre with three compositions holding history, four lookups, and the compensation catalogue with its link table</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect width="680" height="490" fill="#ffffff"/>
+
+<g>
+  <rect x="60" y="60" width="145" height="52" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text x="132" y="82" text-anchor="middle" font-size="14" font-weight="500" fill="#2C2C2A">PlayerStatus</text>
+  <text x="132" y="100" text-anchor="middle" font-size="12" fill="#444441">codes and colours</text>
+</g>
+
+<g>
+  <rect x="230" y="60" width="130" height="52" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text x="295" y="82" text-anchor="middle" font-size="14" font-weight="500" fill="#2C2C2A">Preference</text>
+  <text x="295" y="100" text-anchor="middle" font-size="12" fill="#444441">shared profiles</text>
+</g>
+
+<g>
+  <rect x="60" y="160" width="160" height="52" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="140" y="182" text-anchor="middle" font-size="14" font-weight="500" fill="#26215C">Player</text>
+  <text x="140" y="200" text-anchor="middle" font-size="12" fill="#3C3489">core entity</text>
+</g>
+
+<g>
+  <rect x="270" y="160" width="150" height="52" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+  <text x="345" y="182" text-anchor="middle" font-size="14" font-weight="500" fill="#4A1B0C">PlayerCampaigns</text>
+  <text x="345" y="200" text-anchor="middle" font-size="12" fill="#712B13">who got what</text>
+</g>
+
+<g>
+  <rect x="470" y="160" width="170" height="52" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+  <text x="555" y="182" text-anchor="middle" font-size="14" font-weight="500" fill="#4A1B0C">MarketingCampaign</text>
+  <text x="555" y="200" text-anchor="middle" font-size="12" fill="#712B13">prepared remedies</text>
+</g>
+
+<g>
+  <rect x="40" y="280" width="140" height="52" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="110" y="302" text-anchor="middle" font-size="14" font-weight="500" fill="#26215C">Interaction</text>
+  <text x="110" y="320" text-anchor="middle" font-size="12" fill="#3C3489">event history</text>
+</g>
+
+<g>
+  <rect x="195" y="280" width="145" height="52" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="267" y="302" text-anchor="middle" font-size="14" font-weight="500" fill="#26215C">LoyaltyProgram</text>
+  <text x="267" y="320" text-anchor="middle" font-size="12" fill="#3C3489">subscriptions</text>
+</g>
+
+<g>
+  <rect x="350" y="280" width="110" height="52" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="405" y="302" text-anchor="middle" font-size="14" font-weight="500" fill="#26215C">Feedback</text>
+  <text x="405" y="320" text-anchor="middle" font-size="12" fill="#3C3489">ratings 1–5</text>
+</g>
+
+<g>
+  <rect x="488" y="280" width="152" height="52" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text x="564" y="302" text-anchor="middle" font-size="14" font-weight="500" fill="#2C2C2A">CompensationType</text>
+  <text x="564" y="320" text-anchor="middle" font-size="12" fill="#444441">Bonus, VipDays</text>
+</g>
+
+<g>
+  <rect x="488" y="380" width="152" height="52" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text x="564" y="402" text-anchor="middle" font-size="14" font-weight="500" fill="#2C2C2A">CampaignReason</text>
+  <text x="564" y="420" text-anchor="middle" font-size="12" fill="#444441">triggers</text>
+</g>
+
+<line x1="132" y1="112" x2="120" y2="160" stroke="#888780" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<line x1="295" y1="112" x2="180" y2="160" stroke="#888780" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<line x1="110" y1="212" x2="110" y2="280" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="160" y1="212" x2="260" y2="280" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="200" y1="212" x2="396" y2="280" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="220" y1="186" x2="270" y2="186" stroke="#888780" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<line x1="470" y1="186" x2="420" y2="186" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="564" y1="212" x2="564" y2="280" stroke="#888780" stroke-width="1.5" stroke-dasharray="2 4" marker-end="url(#arrow)"/>
+<path d="M470 200 L465 200 L465 406 L488 406" fill="none" stroke="#888780" stroke-width="1.5" stroke-dasharray="2 4" marker-end="url(#arrow)"/>
+
+<line x1="40" y1="455" x2="70" y2="455" stroke="#888780" stroke-width="1.5"/>
+<text x="76" y="459" font-size="12" fill="#444441">composition — part of</text>
+<line x1="230" y1="455" x2="260" y2="455" stroke="#888780" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="266" y="459" font-size="12" fill="#444441">association — reference</text>
+<line x1="430" y1="455" x2="460" y2="455" stroke="#888780" stroke-width="1.5" stroke-dasharray="2 4"/>
+<text x="466" y="459" font-size="12" fill="#444441">value help — by code</text>
+</svg>

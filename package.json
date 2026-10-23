@@ -3,15 +3,63 @@
   "version": "1.0.0",
   "dependencies": {
     "@cap-js/hana": "^2",
-    "@sap/cds": "^9"
+    "@sap-cloud-sdk/connectivity": "^4.9.1",
+    "@sap-cloud-sdk/http-client": "^4.9.1",
+    "@sap-cloud-sdk/resilience": "^4.9.1",
+    "@sap/cds": "^9",
+    "@sap/xssec": "^4"
   },
   "devDependencies": {
+    "@cap-js/cds-test": "^1.0.2",
+    "@cap-js/cds-typer": ">=0.1",
+    "@cap-js/cds-types": "^0.18.0",
     "@cap-js/sqlite": "^2.4",
-    "cds-plugin-ui5": "^0.17.0"
+    "@sap/cds-dk": "^10.0.6",
+    "@types/node": "^24.0.0",
+    "cds-plugin-ui5": "^0.17.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.12",
+    "tsx": "^4",
+    "typescript": "^5.9.0"
   },
   "scripts": {
     "start": "cds-serve",
+    "test": "jest",
+    "build": "cds build --production",
+    "watch-integrated": "cds watch --profile integration --port 4004 --open project1/index.html?sap-ui-xx-viewCache=false --livereload false",
     "watch-project1": "cds watch --open project1/index.html?sap-ui-xx-viewCache=false --livereload false"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 30000,
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/app/",
+      "/gen/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/gen/"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "ts",
+      "json"
+    ],
+    "transform": {
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "module": "commonjs",
+            "esModuleInterop": true,
+            "strict": false
+          }
+        }
+      ]
+    },
+    "setupFiles": [
+      "<rootDir>/test/jest.setup.js"
+    ]
   },
   "private": true,
   "workspaces": [
@@ -19,5 +67,75 @@
   ],
   "sapux": [
     "app/project1"
-  ]
+  ],
+  "cds": {
+    "requires": {
+      "auth": {
+        "[development]": {
+          "kind": "mocked",
+          "users": {
+            "admin": {
+              "password": "admin",
+              "roles": [
+                "CRMAdmin"
+              ]
+            },
+            "support": {
+              "password": "support",
+              "roles": [
+                "SupportAgent"
+              ]
+            },
+            "community": {
+              "password": "community",
+              "roles": [
+                "CommunityManager"
+              ]
+            },
+            "integration": {
+              "password": "integration",
+              "roles": [
+                "system-user"
+              ]
+            }
+          }
+        },
+        "[production]": {
+          "kind": "xsuaa"
+        }
+      },
+      "db": {
+        "[production]": {
+          "kind": "hana",
+          "deploy-format": "hdbtable"
+        }
+      },
+      "OrderIntegrationService": {
+        "kind": "odata-v4",
+        "model": "srv/external/order-integration-service",
+        "[integration]": {
+          "credentials": {
+            "url": "http://localhost:4005/integration/orders",
+            "authentication": "BasicAuthentication",
+            "username": "integration",
+            "password": "integration"
+          }
+        },
+        "[production]": {
+          "credentials": {
+            "destination": "player-orders-api"
+          }
+        }
+      },
+      "[production]": {
+        "auth": {
+          "kind": "xsuaa"
+        }
+      },
+      "html5-repo": true
+    }
+  },
+  "imports": {
+    "#cds-models/*": "./@cds-models/*/index.js"
+  }
 }

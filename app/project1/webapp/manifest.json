@@ -92,6 +92,26 @@
           "pattern": "Players({key}):?query:",
           "name": "PlayersObjectPage",
           "target": "PlayersObjectPage"
+        },
+        {
+          "pattern": "MarketingCampaigns:?query:",
+          "name": "MarketingCampaignsList",
+          "target": "MarketingCampaignsList"
+        },
+        {
+          "pattern": "MarketingCampaigns({key}):?query:",
+          "name": "MarketingCampaignsObjectPage",
+          "target": "MarketingCampaignsObjectPage"
+        },
+        {
+          "pattern": "OrderIssues:?query:",
+          "name": "OrderIssuesList",
+          "target": "OrderIssuesList"
+        },
+        {
+          "pattern": "OrderIssues({key}):?query:",
+          "name": "OrderIssuesObjectPage",
+          "target": "OrderIssuesObjectPage"
         }
       ],
       "targets": {
@@ -102,7 +122,23 @@
           "options": {
             "settings": {
               "contextPath": "/Players",
-              "variantManagement": "Page",
+              "variantManagement": "Control",
+              "views": {
+                "paths": [
+                  {
+                    "key": "all",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllPlayers"
+                  },
+                  {
+                    "key": "atRisk",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AtRiskPlayers"
+                  },
+                  {
+                    "key": "vip",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#VipPlayers"
+                  }
+                ]
+              },
               "navigation": {
                 "Players": {
                   "detail": {
@@ -114,6 +150,28 @@
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
                     "type": "ResponsiveTable"
+                  },
+                  "actions": {
+                    "openCampaigns": {
+                      "press": "project1.ext.controller.Navigation.toCampaigns",
+                      "text": "{i18n>navToCampaigns}",
+                      "enabled": true,
+                      "visible": true,
+                      "position": {
+                        "placement": "After",
+                        "anchor": "Create"
+                      }
+                    },
+                    "openIssues": {
+                      "press": "project1.ext.controller.Navigation.toIssues",
+                      "text": "{i18n>navToIssues}",
+                      "enabled": true,
+                      "visible": true,
+                      "position": {
+                        "placement": "After",
+                        "anchor": "openCampaigns"
+                      }
+                    }
                   }
                 }
               }
@@ -127,7 +185,98 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/Players"
+              "contextPath": "/Players",
+              "sectionLayout": "Tabs"
+            }
+          }
+        },
+        "MarketingCampaignsList": {
+          "type": "Component",
+          "id": "MarketingCampaignsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/MarketingCampaigns",
+              "variantManagement": "Page",
+              "navigation": {
+                "MarketingCampaigns": {
+                  "detail": {
+                    "route": "MarketingCampaignsObjectPage"
+                  }
+                }
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable"
+                  },
+                  "actions": {
+                    "openPlayers": {
+                      "press": "project1.ext.controller.Navigation.toPlayers",
+                      "text": "{i18n>navToPlayers}",
+                      "enabled": true,
+                      "visible": true,
+                      "position": {
+                        "placement": "After",
+                        "anchor": "Create"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "MarketingCampaignsObjectPage": {
+          "type": "Component",
+          "id": "MarketingCampaignsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/MarketingCampaigns"
+            }
+          }
+        },
+        "OrderIssuesList": {
+          "type": "Component",
+          "id": "OrderIssuesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/OrderIssues",
+              "variantManagement": "Page",
+              "navigation": {
+                "OrderIssues": {
+                  "detail": {
+                    "route": "OrderIssuesObjectPage"
+                  }
+                }
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": { "type": "ResponsiveTable" },
+                  "actions": {
+                    "openPlayers": {
+                      "press": "project1.ext.controller.Navigation.toPlayers",
+                      "text": "{i18n>navToPlayers}",
+                      "enabled": true,
+                      "visible": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "OrderIssuesObjectPage": {
+          "type": "Component",
+          "id": "OrderIssuesObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/OrderIssues"
             }
           }
         }

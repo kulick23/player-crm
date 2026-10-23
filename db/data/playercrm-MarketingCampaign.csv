@@ -1,0 +1,5 @@
+ID;name;description;startDate;endDate;reason;compensationType;compensationValue
+ffffffff-1111-1111-1111-111111111111;Service Recovery;Goodwill bonus for players who rated the support experience poorly;2026-01-01;2026-12-31;LowRating;Bonus;50.00
+ffffffff-2222-2222-2222-222222222222;Downtime Apology;Complimentary VIP days after a platform outage or a broken case drop;2026-01-01;2026-12-31;TechnicalIssue;VipDays;7.00
+ffffffff-3333-3333-3333-333333333333;Comeback Bonus;Balance top-up offered to players who stopped logging in;2026-01-01;2026-12-31;Churn;Bonus;100.00
+ffffffff-4444-4444-4444-444444444444;Payment Failed Discount;Discount on the next purchase after a failed payment;2026-01-01;2026-12-31;PaymentFailure;Discount;15.00

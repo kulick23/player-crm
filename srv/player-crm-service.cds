@@ -1,111 +1,148 @@
 using playercrm from '../db/schema';
 
+@requires: 'authenticated-user'
 service PlayerCRMService {
 
   @odata.draft.enabled
-  @UI.LineItem: [
-    { Value: displayName },
-    { Value: email },
-    { Value: balance },
-    { Value: vipTier }
+  @restrict: [
+    { grant: '*',                    to: 'CRMAdmin' },
+    { grant: ['READ', 'UPDATE'],     to: 'SupportAgent' },
+    { grant: 'READ',                 to: 'CommunityManager' }
   ]
-  entity Players as projection on playercrm.Player actions {
-    action activateVIP(tier: String) returns Players;
+  entity Players as projection on playercrm.Player {
+    *,
+    status.code as statusCode : String(20),
+
+    status.criticality as statusCriticality : Integer,
+    virtual null as ratingCriticality : Integer,
+    virtual null as hideActivateVIP : Boolean,
+    virtual null as hideCancelVIP : Boolean,
+    virtual null as hideGrantCompensation : Boolean
+  } actions {
+    @requires: 'CRMAdmin'
+    action   activateVIP(tier: String) returns Players;
+
+    @requires: 'CRMAdmin'
+    action   cancelVIP() returns Players;
+
+    @restrict: [{ grant: '*', to: ['CRMAdmin', 'SupportAgent'] }]
+    action   grantCompensation(campaign_ID: UUID, note: String) returns Players;
+
+    function stats() returns PlayerStats;
+    function orderSummary() returns OrderSummary;
   };
 
-  @UI.LineItem: [
-    { Value: code },
-    { Value: description }
+  function atRiskPlayers(minRating: Decimal(2,1)) returns array of PlayerSummary;
+
+  type PlayerStats {
+    feedbackCount    : Integer;
+    interactionCount : Integer;
+    loyaltyTotal     : Decimal(10,2);
+    averageRating    : Decimal(2,1);
+    activeSince      : DateTime;
+  }
+
+  type PlayerSummary {
+    ID            : UUID;
+    displayName   : String(100);
+    statusCode    : String(20);
+    averageRating : Decimal(2,1);
+  }
+
+  type OrderSummary {
+    orderCount     : Integer;
+    totalSpent     : Decimal(10,2);
+    paidOrderCount : Integer;
+    lastOrderDate  : DateTime;
+  }
+
+  @readonly
+  @cds.persistence.skip
+  entity VIPDurations {
+    key code : String(20);
+        label : String(50);
+        days  : Integer;
+        price : Decimal(10,2);
+  }
+
+  @restrict: [
+    { grant: '*',    to: 'CRMAdmin' },
+    { grant: 'READ', to: ['SupportAgent', 'CommunityManager'] }
   ]
   entity PlayerStatuses as projection on playercrm.PlayerStatus;
 
-  @UI.LineItem: [
-    { Value: favoriteMode },
-    { Value: preferredRarity },
-    { Value: notes }
+  @restrict: [
+    { grant: '*',                to: 'CRMAdmin' },
+    { grant: ['READ', 'UPDATE'], to: 'SupportAgent' },
+    { grant: 'READ',             to: 'CommunityManager' }
   ]
   entity Preferences as projection on playercrm.Preference;
 
-  @UI.LineItem: [
-    { Value: type },
-    { Value: date },
-    { Value: summary }
+  @restrict: [
+    { grant: '*',                          to: 'CRMAdmin' },
+    { grant: ['READ', 'CREATE', 'UPDATE'], to: 'SupportAgent' },
+    { grant: 'READ',                       to: 'CommunityManager' }
   ]
   entity Interactions as projection on playercrm.Interaction;
 
-  @UI.LineItem: [
-    { Value: tier },
-    { Value: startDate },
-    { Value: endDate },
-    { Value: price }
+  @restrict: [
+    { grant: '*',    to: 'CRMAdmin' },
+    { grant: 'READ', to: ['SupportAgent', 'CommunityManager'] }
   ]
   entity LoyaltyPrograms as projection on playercrm.LoyaltyProgram;
 
-  @UI.LineItem: [
-    { Value: rating },
-    { Value: comment },
-    { Value: feedbackDate }
+  @restrict: [
+    { grant: '*',                to: 'CRMAdmin' },
+    { grant: ['READ', 'CREATE'], to: 'SupportAgent' },
+    { grant: 'READ',             to: 'CommunityManager' }
   ]
-  entity Feedbacks as projection on playercrm.Feedback;
+  entity Feedbacks as projection on playercrm.Feedback {
+    *,
+    virtual null as ratingCriticality : Integer
+  };
 
-  @UI.LineItem: [
-    { Value: name },
-    { Value: startDate },
-    { Value: endDate }
+  @restrict: [
+    { grant: ['READ', 'resolveIssue'], to: ['CRMAdmin', 'SupportAgent'] },
+    { grant: 'READ', to: 'CommunityManager' }
+  ]
+  entity OrderIssues as projection on playercrm.OrderIssue {
+    *,
+    player.displayName as playerName : String(100),
+    category.name as categoryName : String(100),
+    status.code as statusCode : String(20),
+    status.name as statusName : String(100),
+    status.criticality as statusCriticality : Integer
+  } actions {
+    @restrict: [{ grant: '*', to: ['CRMAdmin', 'SupportAgent'] }]
+    action resolveIssue(
+      resolutionNote: String(1000),
+      campaign_ID: UUID
+    ) returns OrderIssues;
+  };
+
+  @readonly
+  entity OrderIssueCategories as projection on playercrm.OrderIssueCategory;
+
+  @readonly
+  entity OrderIssueStatuses as projection on playercrm.OrderIssueStatus;
+
+  @odata.draft.enabled
+  @restrict: [
+    { grant: '*',    to: ['CRMAdmin', 'CommunityManager'] },
+    { grant: 'READ', to: 'SupportAgent' }
   ]
   entity MarketingCampaigns as projection on playercrm.MarketingCampaign;
 
-}
-
-annotate PlayerCRMService.Players with {
-  status @Common.ValueList: {
-    CollectionPath : 'PlayerStatuses',
-    Parameters     : [
-      { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: status_ID, ValueListProperty: 'ID' },
-      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'code' },
-      { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'description' }
-    ]
-  };
-};
-
-annotate PlayerCRMService.Players with @(
-  UI.HeaderInfo: {
-    TypeName      : 'Player',
-    TypeNamePlural: 'Players',
-    Title         : { Value: displayName }
-  },
-  UI.SelectionFields: [
-    vipTier,
-    status_ID
-  ],
-  UI.FieldGroup #Profile: {
-    Data: [
-      { Value: displayName },
-      { Value: email },
-      { Value: balance },
-      { Value: vipTier }
-    ]
-  },
-  UI.Facets: [
-    {
-      $Type : 'UI.ReferenceFacet',
-      Label : 'Profile',
-      Target: '@UI.FieldGroup#Profile'
-    },
-    {
-      $Type : 'UI.ReferenceFacet',
-      Label : 'Interactions',
-      Target: 'interactions/@UI.LineItem'
-    },
-    {
-      $Type : 'UI.ReferenceFacet',
-      Label : 'Feedback',
-      Target: 'feedbacks/@UI.LineItem'
-    },
-    {
-      $Type : 'UI.ReferenceFacet',
-      Label : 'Loyalty',
-      Target: 'loyalty/@UI.LineItem'
-    }
+  @restrict: [
+    { grant: '*',    to: ['CRMAdmin', 'CommunityManager'] },
+    { grant: 'READ', to: 'SupportAgent' }
   ]
-);
+  entity CampaignParticipants as projection on playercrm.PlayerCampaigns;
+
+  @readonly
+  entity CompensationTypes as projection on playercrm.CompensationType;
+
+  @readonly
+  entity CampaignReasons as projection on playercrm.CampaignReason;
+
+}
